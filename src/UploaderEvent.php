@@ -6,7 +6,7 @@ namespace Webinertia\Uploader;
 
 use Laminas\EventManager\Event;
 
-class UploaderEvent extends Event
+final class UploaderEvent extends Event
 {
     public const EVENT_UPLOAD = 'upload';
     public const EVENT_DELETE = 'delete';
