@@ -38,7 +38,7 @@ trait UploaderAwareTrait
             } elseif (is_object($this->eventIdentifier)) {
                 $identifiers[] = $this->eventIdentifier;
             }
-            // silently ignore invalid eventIdentifier types
+            // ignore invalid eventIdentifier types
         }
         $events->setIdentifiers($identifiers);
         $this->events = $events;

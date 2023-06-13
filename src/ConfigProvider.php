@@ -19,4 +19,11 @@ final class ConfigProvider
             UploaderListener::class,
         ];
     }
+
+    public function getUploaderConfig(): array
+    {
+        return [
+
+        ];
+    }
 }

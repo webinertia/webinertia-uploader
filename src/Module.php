@@ -12,6 +12,7 @@ final class Module
         return [
             'service_manager' => $configProvider->getDependencyConfig(),
             'listeners'       => $configProvider->getListenerConfig(),
+            'uploader'        => $configProvider->getUploaderConfig(),
         ];
     }
 }
