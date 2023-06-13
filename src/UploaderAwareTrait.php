@@ -14,7 +14,7 @@ use function is_object;
 use function is_string;
 use function method_exists;
 
-trait UploaderAwareInterfaceTrait
+trait UploaderAwareTrait
 {
     /** @var EventManagerInterface */
     protected $events;
