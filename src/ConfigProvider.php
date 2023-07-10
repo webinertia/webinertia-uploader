@@ -9,7 +9,9 @@ final class ConfigProvider
     public function getDependencyConfig(): array
     {
         return [
-            UploaderListener::class => UploaderListenerFactory::class,
+            'factories' => [
+                UploaderListener::class => UploaderListenerFactory::class,
+            ],
         ];
     }
 
