@@ -51,7 +51,7 @@
     "scripts": {
         "check": [
             "@cs-check",
-            "@static-analysis",
+            "@phpstan",
             "@test"
         ],
         "cs-check": "phpcs",
