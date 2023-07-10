@@ -52,10 +52,8 @@ trait UploaderAwareTrait
      * Retrieve the event manager
      *
      * Lazy-loads an EventManager instance if none registered.
-     *
-     * @return EventManagerInterface
      */
-    public function getEventManager()
+    public function getEventManager(): EventManagerInterface
     {
         if (! $this->events instanceof EventManagerInterface) {
             $this->setEventManager(new EventManager());
