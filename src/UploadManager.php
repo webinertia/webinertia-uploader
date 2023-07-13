@@ -17,6 +17,8 @@ use function iterator_apply;
 final class UploadManager extends AbstractHandler
 {
     use ModelTrait;
+
+    protected function processParams(array $params): void { }
     /**
      * todo update
      * webinertia/webinertia-db
