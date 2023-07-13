@@ -10,9 +10,9 @@ final class Module
     {
         $configProvider = new ConfigProvider();
         return [
-            'service_manager' => $configProvider->getDependencyConfig(),
-            'listeners'       => $configProvider->getListenerConfig(),
-            'uploader'        => $configProvider->getUploaderConfig(),
+            'service_manager'          => $configProvider->getDependencyConfig(),
+            'listeners'                => $configProvider->getListenerConfig(),
+            ConfigProvider::CONFIG_KEY => $configProvider->getComponentConfig(),
         ];
     }
 }

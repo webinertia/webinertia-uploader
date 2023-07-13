@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace Webinertia\Uploader;
 
+use Laminas\EventManager\AbstractListenerAggregate;
 use Laminas\EventManager\EventInterface;
 use Laminas\EventManager\EventManagerInterface;
-use Laminas\EventManager\AbstractListenerAggregate;
+use Laminas\EventManager\ResponseCollection;
+use Psr\Http\Message\ServerRequestInterface;
 
 use function method_exists;
 
 final class UploaderListener extends AbstractListenerAggregate
 {
+    public function __construct(
+        protected ServerRequestInterface $request,
+        protected UploadManager $manager
+    ) {
+    }
     /** @inheritDoc */
     public function attach(EventManagerInterface $events, $priority = 1)
     {
@@ -19,30 +26,24 @@ final class UploaderListener extends AbstractListenerAggregate
         $this->listeners[] = $sharedManager->attach(
             UploaderAwareInterface::class,
             UploaderEvent::EVENT_UPLOAD,
-            [$this, 'upload'],
+            [$this, 'handleUpload'],
             $priority
         );
         $this->listeners[] = $sharedManager->attach(
             UploaderAwareInterface::class,
             UploaderEvent::EVENT_DELETE,
-            [$this, 'delete'],
+            [$this, 'handleDelete'],
             $priority
         );
     }
 
-    public function upload(EventInterface $event): mixed
+    public function handleUpload(UploaderEvent $event)
     {
-        $target = $event->getTarget();
-        if (! method_exists($target, 'handleUpload')) {
-            throw new Exception\UnknownHandlerException(
-                'EventHandler handleUpload is not a method of target: ' . $target::class
-            );
-        }
-
-        return $target->handleUpload($event->getParams()) ? true : false;
+        $event->setRequest($this->request);
+        return $this->manager->handleUpload($event);
     }
 
-    public function delete(EventInterface $event): mixed
+    public function handleDelete(UploaderEvent $event)
     {
         $target = $event->getTarget();
         if (! method_exists($target, 'handleDelete')) {
