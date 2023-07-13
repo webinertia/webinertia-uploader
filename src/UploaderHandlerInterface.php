@@ -6,7 +6,6 @@ namespace Webinertia\Uploader;
 
 interface UploaderHandlerInterface
 {
-    public const FIELDSET = 'file-data';
-    public function handleUpload(array $fileData);
-    public function handleDelete(array $fileData);
+    public function handleUpload(UploaderEvent $event);
+    public function handleDelete(UploaderEvent $event);
 }

@@ -9,5 +9,6 @@ use Laminas\EventManager\EventManagerInterface;
 
 interface UploaderAwareInterface extends EventManagerAwareInterface
 {
-    public function getEventManager(): EventManagerInterface;
+    public function setEventManager(EventManagerInterface $events);
+    public function getEventManager();
 }

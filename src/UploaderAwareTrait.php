@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Webinertia\Uploader;
 use Laminas\EventManager\EventManager;
 use Laminas\EventManager\EventManagerInterface;
+use Laminas\Mvc\Controller\AbstractController;
+use Laminas\Stdlib\DispatchableInterface;
 use Traversable;
 
 use function array_merge;
@@ -25,8 +27,21 @@ trait UploaderAwareTrait
      * identifiers, in addition to any string or array of strings set to the
      * $this->eventIdentifier property.
      */
-    public function setEventManager(EventManagerInterface $events): self
+    public function setEventManager(EventManagerInterface $events)
     {
+        if ($this instanceof DispatchableInterface) {
+            if ($this instanceof AbstractController) {
+                throw new Exception\NonCompatibleServiceException(
+                    'UploaderAwareTrait is not compatible with classes that extend '
+                    . AbstractController::class
+                );
+            }
+            throw new Exception\NonCompatibleServiceException(
+                'UploaderAwareTrait is not compatible with classes that extend '
+                . DispatchableInterface::class
+            );
+        }
+
         $identifiers = [self::class, static::class, UploaderAwareInterface::class];
         if (isset($this->eventIdentifier)) {
             if (
