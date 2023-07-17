@@ -45,13 +45,6 @@ final class UploaderListener extends AbstractListenerAggregate
 
     public function handleDelete(UploaderEvent $event)
     {
-        $target = $event->getTarget();
-        if (! method_exists($target, 'handleDelete')) {
-            throw new Exception\UnknownHandlerException(
-                'EventHandler handleDelete is not a method of target: ' . $target::class
-            );
-        }
-
-        return $target->handleDelete($event->getParams()) ? true : false;
+        return $this->manager->handleDelete($event);
     }
 }

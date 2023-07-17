@@ -15,6 +15,8 @@ final class UploaderEvent extends Event
 
     protected array $files;
     protected ServerRequestInterface|ServerRequest $request;
+    protected ?string $fileName;
+    protected ?string $fileId;
 
     public function setRequest(ServerRequest $request): void
     {
@@ -34,5 +36,25 @@ final class UploaderEvent extends Event
     public function getFiles()
     {
         return $this->files;
+    }
+
+    public function setFileName(string $fileName): void
+    {
+        $this->fileName = $fileName;
+    }
+
+    public function getFileName(): string|null
+    {
+        return $this->fileName;
+    }
+
+    public function setFileId(string $fileId): void
+    {
+        $this->fileId = $fileId;
+    }
+
+    public function getFileId(): string|null
+    {
+        return $this->fileId;
     }
 }

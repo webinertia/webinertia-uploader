@@ -9,10 +9,11 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
+use Webinertia\Filter\Uuid;
 
 final class UploadManagerFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): UploadManager
     {
         $config = $container->get('config');
         if (! isset($config[ConfigProvider::CONFIG_KEY]['handler_config'])) {
@@ -27,10 +28,12 @@ final class UploadManagerFactory implements FactoryInterface
                 ]
             )
         );
+        $uuid = new Uuid();
         return new $requestedName(
             $config,
             $container->get(TableGateway::class),
             $filter,
+            $uuid,
             []
         );
     }
