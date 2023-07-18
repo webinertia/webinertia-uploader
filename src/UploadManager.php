@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Webinertia\Uploader;
 
+use Laminas\Db\ResultSet\ResultSetInterface;
+use Laminas\Db\ResultSet\HydratingResultSet;
 use Laminas\Diactoros\UploadedFile;
-use Laminas\EventManager\ResponseCollection;
 use Laminas\Filter\BaseName;
-use Laminas\Filter\Exception\InvalidArgumentException;
-use Laminas\Filter\Exception\RuntimeException;
 use RecursiveArrayIterator;
 use SplFileInfo;
+use Webinertia\Db\Exception\RecordNotFound;
 use Webinertia\Db\ModelTrait;
 use Webinertia\Filter\Uuid;
 
@@ -21,55 +21,75 @@ class UploadManager extends AbstractHandler
 {
     use ModelTrait;
 
-    public function handleUpload(UploaderEvent $event)
+    /** @var array<int, array> $uploaded */
+    protected array $uploaded = [];
+
+    public function handleUpload(UploaderEvent $event): array
     {
         $request = $event->getRequest();
         $this->exchangeArray($event->getParams());
         $files    = $request->getUploadedFiles();
         $iterator = new RecursiveArrayIterator($files);
         iterator_apply($iterator, self::class . '::fileSearch', [$iterator]);
-        return 'last';
+        return $this->uploaded;
     }
 
-    public function handleDelete(UploaderEvent $event)
+    /**
+     * @param UploaderEvent $event
+     * @return array
+     * @throws Exception\RunTimeException
+     * @throws RecordNotFound
+     */
+    public function handleDelete(UploaderEvent $event): array
     {
+        $deleted = [];
         $params = $event->getParams();
         if (! isset($params['uuid'])) {
             throw new Exception\RunTimeException('Delete Event requires the file uuid to be passed as a param');
         }
-        $data = $this->fetchByColumn('uuid', $params['uuid']);
-        if ($data instanceof self) {
-            $fileInfo = new SplFileInfo($data->target . $data->fileName);
-            if ($fileInfo->isFile()) {
-                if(unlink($fileInfo->getRealPath())) {
-                    // this must use offsetGet due to uuid being a class property
-                    if ($this->delete(['uuid' => $data->offsetGet('uuid')])) {
-                        return $data->offsetGet('uuid');
-                    } else {
+        /** @var ResultSetInterface|HydratingResultSet $fileData */
+        $resultSet = $this->fetchByColumn('uuid', $params['uuid']);
+        if ($resultSet->count() === 0) {
+            throw new RecordNotFound('The requested records could not be found');
+        }
 
-                    }
+        foreach ($resultSet as $file) {
+            if ($file instanceof self) {
+                $data = $file->getArrayCopy();
+                $result = $this->deleteFile(new SplFileInfo($data['target'] . $data['fileName']));
+                if ($result && $this->delete(['uuid' => $data['uuid']]) !== 0) {
+                    $deleted[] = [$data['uuid'] => $data['fileName']];
                 }
             }
         }
+        return $deleted;
     }
 
+    protected function deleteFile(SplFileInfo $file): bool
+    {
+        if (! $file->isFile()) {
+            throw new Exception\RunTimeException('File not found.');
+        }
+        return unlink($file->getRealPath());
+    }
     protected function fileSearch($iterator)
     {
         while ($iterator->valid() ) {
             if ($iterator->hasChildren()) {
                 $current = $iterator->current();
                 if ($current instanceof UploadedFile) {
-                    $this->processUploadedFile($current);
+                    $this->uploaded[] = $this->processUploadedFile($current);
                 }
                 $this->fileSearch($iterator->getChildren());
             } else {
                 $current = $iterator->current();
                 if ($current instanceof UploadedFile) {
-                    $this->processUploadedFile($current);
+                    $this->uploaded[] = $this->processUploadedFile($current);
                 }
             }
             $iterator->next();
         }
+        return $this->uploaded;
     }
 
     protected function processUploadedFile(UploadedFile $file)
@@ -83,5 +103,6 @@ class UploadManager extends AbstractHandler
             $this->offsetSet('uuid', $uuid->filter(null));
             $this->save($this);
         }
+        return $this->getArrayCopy();
     }
 }

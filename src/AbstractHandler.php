@@ -16,6 +16,11 @@ abstract class AbstractHandler extends AbstractModel implements UploaderHandlerI
     public const BASE_PUBLIC_PATH = __DIR__ . '/upload';
     public const BASE_LOCAL_PATH  = __DIR__ . '/../../../../public/upload';
 
+    /** @var array<string, string> $messageTemplate */
+    protected $messageTemplate = [
+        'FILE_NOT_FOUND'   => 'The requested file could not be found.',
+        'FILE_NOT_DELETED' => 'File could not be deleted.'
+    ];
     /** @var array $columns */
     protected array $columnMap = [
         'id',
